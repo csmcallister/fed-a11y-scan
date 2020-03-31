@@ -33,7 +33,7 @@ class DomainScanStack(core.Stack):
 
         asset = aws_s3_assets.Asset(
             self, 'domain-list',
-            path=os.path.abspath('./assets/domains.csv')
+            path=os.path.abspath('./domains/domains.csv')
         )
         
         ##################################

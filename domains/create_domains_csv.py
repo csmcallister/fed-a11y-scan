@@ -197,6 +197,6 @@ if __name__ == '__main__':
 
     df = df.drop_duplicates(subset=['subdomain', 'domain', 'tld'])
 
-    df.to_csv('../assets/domains.csv', index=False)
+    df.to_csv('domains.csv', index=False)
 
     print("All done!")

@@ -61,7 +61,7 @@ def get_domains():
             send_sqs_messages(msg_bodies)
     else:
         # for local testing
-        with open('../../../assets.domains.csv', 'r') as f:
+        with open('../../../domains/domains.csv', 'r') as f:
             lines = f.read().split("\n")
         csvreader = csv.DictReader(lines)
         for i, row in enumerate(csvreader):

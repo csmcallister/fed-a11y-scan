@@ -8,7 +8,7 @@ Automated accessibility testing of U.S. Federal Government websites using a serv
 
 Following these steps will help you get started.
 
->If you're only interested in the list of Federal domains we scan, you can checkout the [spreadsheet](https://github.com/csmcallister/gov-a11y-scan/tree/master/assets/domains.csv) that has them all - at least the ones we've been able to find - as well as the [script](https://github.com/csmcallister/gov-a11y-scan/tree/master/domains/create_domains_csv.py)) used to generate that file.
+>If you're only interested in the list of Federal domains we scan, you can checkout the [spreadsheet](https://github.com/csmcallister/gov-a11y-scan/tree/master/domains/domains.csv) that has them all - at least the ones we've been able to find - as well as the [script](https://github.com/csmcallister/gov-a11y-scan/tree/master/domains/create_domains_csv.py)) used to generate that file.
 
 ### Install and Configure the AWS CDK
 
