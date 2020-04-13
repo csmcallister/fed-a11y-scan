@@ -39,12 +39,12 @@ build_results_joiner:
 
 
 bootstrap:	
-	cdk bootstrap --profile gov-a11y
+	cdk bootstrap --profile fed-a11y-scan
 
 
 deploy:
-	cdk deploy --profile gov-a11y
+	cdk deploy --profile fed-a11y-scan
 
 
 destroy:
-	cdk destroy --profile gov-a11y
+	cdk destroy --profile fed-a11y-scan

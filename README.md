@@ -1,4 +1,4 @@
-# gov-a11y-scan
+# Fed A11y Scan
 
 Automated accessibility testing of U.S. Federal Government websites using a serverless infrastructure.
 
@@ -8,7 +8,7 @@ Automated accessibility testing of U.S. Federal Government websites using a serv
 
 Following these steps will help you get started.
 
->If you're only interested in the list of Federal domains we scan, you can checkout the [spreadsheet](https://github.com/csmcallister/gov-a11y-scan/tree/master/domains/domains.csv) that has them all - at least the ones we've been able to find - as well as the [script](https://github.com/csmcallister/gov-a11y-scan/tree/master/domains/create_domains_csv.py)) used to generate that file.
+>If you're only interested in the list of Federal domains we scan, you can checkout the [spreadsheet](https://github.com/csmcallister/fed-a11y-scan/tree/master/domains/domains.csv) that has them all - at least the ones we've been able to find - as well as the [script](https://github.com/csmcallister/fed-a11y-scan/tree/master/domains/create_domains_csv.py)) used to generate that file.
 
 ### Install and Configure the AWS CDK
 
@@ -96,4 +96,4 @@ Note, however, that this step will not destroy the CloudFormation Stack or the S
 
 ## LICENSE
 
-GNU General Public License. See it [here]((https://github.com/csmcallister/gov-a11y-scan/blob/master/.github/LICENSE)).
+GNU General Public License. See it [here]((https://github.com/csmcallister/fed-a11y-scan/blob/master/.github/LICENSE)).
