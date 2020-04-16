@@ -14,6 +14,8 @@ import requests
 import tldextract
 from tqdm import tqdm
 
+from agency_org_cleaner import rename_rows
+
 logger = logging.getLogger(__name__)
 
 warnings.filterwarnings("ignore")
@@ -197,6 +199,8 @@ if __name__ == '__main__':
 
     df = df.drop_duplicates(subset=['subdomain', 'domain', 'tld'])
 
+    df[['Agency', 'Organization']] = df.apply(rename_rows,axis=1).apply(pd.Series)
+    
     df.to_csv('domains.csv', index=False)
 
     print("All done!")
