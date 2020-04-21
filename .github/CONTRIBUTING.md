@@ -9,7 +9,7 @@ We'd love your help! We want to make contributing to this project as easy and tr
 
 ## What to Contribute?!
 
-Although our backlog can be found on our [Issues Page](https://github.com/csmcallister/fed-a11yy-scan/issues), we're happy to review/discuss your prosed contributions if you open an issue.
+Although our backlog can be found on our [Issues Page](https://github.com/csmcallister/fed-a11y-scan/issues), we're happy to review/discuss your prosed contributions if you open an issue.
 
 ## How to Contribute
 
@@ -21,7 +21,7 @@ We Use [Github Flow](https://guides.github.com/introduction/flow/index.html), so
 
 Before you start to work on something, fork this repo, clone the repository, and then make a new branch for your feature.
 
-As you implement changes, commit them to your local branch, ideally following our [style guide](https://github.com/DataKind-DC/capital-nature-ingest/blob/master/.github/STYLE-GUIDE.md). When you're ready, push that branch to GitHub and then make a pull request. Then await review and, if necessary, push some more changes.
+As you implement changes, commit them to your local branch. When you're ready, push that branch to GitHub and then make a pull request. Then await review and, if necessary, push some more changes.
 
 #### Long Version
 
@@ -29,7 +29,7 @@ As you implement changes, commit them to your local branch, ideally following ou
 
 1. Fork the repository
 
-Go to the project's [homepage](https://github.com/csmcallister/fed-a11yy-scan) and hit the `Fork` button. This creates a copy of the repository in your GitHub account.
+Go to the project's [homepage](https://github.com/csmcallister/fed-a11y-scan) and hit the `Fork` button. This creates a copy of the repository in your GitHub account.
 
 2. `git clone` your forked repository
 
@@ -110,10 +110,10 @@ git remote -v
 If you added the upstream repository as described above you will see something like:
 
 ```bash
-origin  git@github.com:yourname/fed-a11yy-scan-yourname.git (fetch)
-origin  git@github.com:yourname/fed-a11yy-scan-yourname.git (push)
-upstream        git://github.com/fed-a11yy-scan-yourname.git (fetch)
-upstream        git://github.com/fed-a11yy-scan-yourname.git (push)
+origin  git@github.com:yourname/fed-a11y-scan-yourname.git (fetch)
+origin  git@github.com:yourname/fed-a11y-scan-yourname.git (push)
+upstream        git://github.com/fed-a11y-scan-yourname.git (fetch)
+upstream        git://github.com/fed-a11y-scan-yourname.git (push)
 ```
 
 Once you've pushed your code, your code is on your GitHub repo and is not yet a part of the main project. For that to happen, a **Pull Request (PR)** needs to be submitted on GitHub. But first, you should test your code!
@@ -198,7 +198,7 @@ git branch -d shiny-new-feature
 
 ## Reporting bugs or making feature requests
 
-We use GitHub issues to track bugs and make feature requests. [Open a new issue](https://github.com/csmcallister/fed-a11yy-scan/issues) if you've got an idea. An issue template will autopopulate. Feel free to use only those sections of the issue template that you think are relevant. Or start from scratch.
+We use GitHub issues to track bugs and make feature requests. [Open a new issue](https://github.com/csmcallister/fed-a11y-scan/issues) if you've got an idea. An issue template will autopopulate. Feel free to use only those sections of the issue template that you think are relevant. Or start from scratch.
 
 **Great Bug Reports** tend to have:
 
@@ -214,4 +214,4 @@ People *love* thorough bug reports. I'm not even kidding.
 
 ## License
 
-[here](https://github.com/csmcallister/fed-a11yy-scan/blob/master/.github/LICENSE)
+[here](https://github.com/csmcallister/fed-a11y-scan/blob/master/.github/LICENSE)
