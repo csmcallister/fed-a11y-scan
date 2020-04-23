@@ -36,8 +36,7 @@ def main(event, context):
     
     # Put json file for all of the data
     try:
-        data_key = f'{now}/data.json'
-        s3_utils.put_object(data, DATA_BUCKET_NAME, data_key)
+        s3_utils.put_object(data, DATA_BUCKET_NAME, 'data.json')
     except Exception as e:
         log_helper(logger, e, event)
         return
