@@ -32,7 +32,7 @@ build_results_joiner:
 	pip install -r tmp/requirements.txt -t tmp/
 
 	# zip it all up
-	mkdir lambda-releases ; zip -r lambda-releases/results_joiner.zip tmp/
+	mkdir lambda-releases ; cd tmp; zip -r ../lambda-releases/results_joiner.zip *
 
 	# clean up
 	rm -rf tmp/
