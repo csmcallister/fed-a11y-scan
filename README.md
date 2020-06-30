@@ -10,6 +10,10 @@ Following these steps will help you get started.
 
 >If you're only interested in the list of Federal domains we scan, you can checkout the [spreadsheet](https://github.com/csmcallister/fed-a11y-scan/tree/master/domains/domains.csv) that has them all - at least the ones we've been able to find - as well as the [script](https://github.com/csmcallister/fed-a11y-scan/tree/master/domains/create_domains_csv.py)) used to generate that file.
 
+### Install Docker
+
+We use Docker to create a local AWS Linux environment, which is necessary for packaging up the lambda dependencies, such as Python's lxml library, which must be OS-aware. See how to [install Docker here](https://docs.docker.com/get-docker/).
+
 ### Install and Configure the AWS CDK
 
 Follow the instructions [here](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) to install and configure the AWS CDK. You'll need to install node.js as a part of this step if you don't already have it.
@@ -30,6 +34,8 @@ pip install -r requirements.txt
 
 ### Build
 
+These instructions prepare assets for deployment via the AWS CDK.
+
 #### Build a11y scan lambda
 
 Before we let the AWS CDK deploy the a11y lambda function, we need to make a lambda layer for headless chrome and then tweak the internals of `pa11y`, the accessibility scanning tool, to use headless chrome.
@@ -41,6 +47,16 @@ make build_a11y_scan
 ```
 
 The above command will install the node modules into `lambdas/a11y_scan` and create a zip archive called `chrome_aws_lambda.zip` within `/lambdas/`.
+
+#### Build the Site Mapper
+
+This lambda uses scrapy to sitemap each domain. In order to deploy it, we first need to make a lambda layer out of the dependencies, using Docker to make sure they're built in an AWS Linux environment:
+
+```bash
+make build_site_mapper
+```
+
+The above command will create a zip archive called `site_mapper_layer.zip` within `./lambda-releases/`.
 
 #### Build the scan results joiner lambda
 
