@@ -6,7 +6,9 @@ const pa11y = require('pa11y');
 AWS.config.update({region: 'us-east-1'});
 
 var s3 = new AWS.S3();
+var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
 const bucket = process.env.BUCKET_NAME;
+const tableName = process.env.TABLE_NAME
 
 function isEmpty(obj) {
   for(var key in obj) {
@@ -38,20 +40,41 @@ async function putResult(result, messageBody) {
     'scanDate': scanDate
   };
 
-  const params = {
-    Bucket: bucket,
-    Key: `${key}.json`,
-    Body: JSON.stringify(data),
-    ContentType: 'application/json'
-  };
+  if ( !messageBody.db_id ) {
 
-  try {
-    const response = await s3.upload(params).promise();
-    console.log('Response: ', response);
-    return response;
-  } catch (error) {
-      console.log(error);
-  }
+    const params = {
+      Bucket: bucket,
+      Key: `${key}.json`,
+      Body: JSON.stringify(data),
+      ContentType: 'application/json'
+    };
+  
+    try {
+      const response = await s3.upload(params).promise();
+      console.log('Response: ', response);
+      return response;
+    } catch (error) {
+        console.log(error);
+    } 
+  } else {
+    // This is for the sitemapper functionality test
+    let ddbParams = {
+      TableName: tableName,
+      Item: {
+        'agency+org+domain+subdomain+path' : {S: messageBody.db_id},
+        'data' : {S: JSON.stringify(data)}
+      }
+    };
+
+    ddb.putItem(ddbParams, (err, data) => {
+      if (err) {
+        console.log("Error", err);
+      } else {
+        console.log("Successfully putItem");
+      }
+    });
+
+  };
   return
 };
 
@@ -126,5 +149,6 @@ exports.handler = async (event, context) => {
   } catch (error) {
       return context.fail(error)
   }
+
   return context.succeed();
 };
