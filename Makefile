@@ -38,6 +38,20 @@ build_results_joiner:
 	rm -rf tmp/
 
 
+build_site_mapper:
+	
+	# make a python dir for layer
+	mkdir -p python/lib/python3.8/site-packages
+	
+	cp lambdas/site_mapper/requirements.txt ./reqs.txt
+	# run dep installation in AWS Linux docker image and write to local dir
+	docker run -v ${PWD}:/var/task "lambci/lambda:build-python3.8" /bin/sh -c "pip install -r ./reqs.txt -t python/lib/python3.8/site-packages/; exit" && \
+	zip -r lambda-releases/site_mapper_layer.zip python > /dev/null
+	
+	rm -rf python/
+	rm reqs.txt
+
+
 bootstrap:	
 	cdk bootstrap --profile fed-a11y-scan
 
