@@ -1,0 +1,15 @@
+{
+    "Records": [
+      {
+        "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
+        "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a...",
+        "body": "{\"Agency\": \"Test Agency\", \"Organization\": \"Test Org\", \"routeable_url\": \"https:\/\/www.example.com\/\", \"subdomain\": \"\", \"domain\": \"example\", \"tld\": \"com\", \"db_id\": \"1\"}",
+        "attributes": {
+          "ApproximateReceiveCount": "1",
+          "SentTimestamp": "1545082649183",
+          "SenderId": "AIDAIENQZJOLO23YVJ4VO",
+          "ApproximateFirstReceiveTimestamp": "1545082649185"
+        }
+      }
+    ]
+  }
