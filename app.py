@@ -1,6 +1,8 @@
 import os
 
 from aws_cdk import (
+    aws_autoscaling as autoscaling,
+    aws_dynamodb as dynamodb,
     aws_events as events,
     aws_events_targets as targets,
     aws_iam as iam,
@@ -23,6 +25,7 @@ class DomainScanStack(core.Stack):
         
         lambda_gatherer_timeout = 600
         lambda_joiner_timeout = 350
+        lambda_mapper_timeout = 400
         # pa11y's timeout is set to 50, so the lambda is just a little longer
         lambda_a11y_scan_timeout = 55
         max_receive_count = 2
@@ -35,12 +38,90 @@ class DomainScanStack(core.Stack):
             self, 'domain-list',
             path=os.path.abspath('./domains/domains.csv')
         )
+
+        current_federal_asset = aws_s3_assets.Asset(
+            self, 'current-federal',
+            path=os.path.abspath('./domains/current-federal.csv')
+        )
+        
+        ##################################
+        # Current Federal Domain Gatherer Lambda and Queue
+        ##################################
+
+        current_domain_queue = sqs.Queue(
+            self, 'current-domain-queue',
+            visibility_timeout=core.Duration.seconds(
+                (max_receive_count + 1) * lambda_gatherer_timeout),
+            dead_letter_queue=sqs.DeadLetterQueue(
+                max_receive_count=max_receive_count,
+                queue=sqs.Queue(
+                    self, 'current-domain-queue-dlq',
+                    retention_period=core.Duration.days(5)
+                )
+            )
+        )
+
+        lambda_current_gatherer = lambda_.Function(
+            self, "current-domain-gatherer",
+            code=lambda_.Code.asset('./lambdas/current_domain_gatherer'),
+            handler="handler.main",
+            timeout=core.Duration.seconds(lambda_gatherer_timeout),
+            runtime=lambda_.Runtime.PYTHON_3_7,
+            memory_size=150
+        )
+
+        lambda_current_gatherer.add_environment(
+            'SQS_URL',
+            current_domain_queue.queue_url
+        )
+        lambda_current_gatherer.add_environment(
+            'BUCKET_NAME',
+            current_federal_asset.s3_bucket_name
+        )
+        lambda_current_gatherer.add_environment(
+            'OBJECT_KEY',
+            current_federal_asset.s3_object_key
+        )
+
+        lambda_current_gatherer_sqs_exec_policy = iam.PolicyStatement(
+            effect=iam.Effect.ALLOW,
+            actions=['lambda:InvokeFunction', 
+                     'sqs:SendMessage', 
+                     'sqs:DeleteMessage', 
+                     'sqs:SendMessageBatch',
+                     'sqs:SetQueueAttributes',
+                     'sqs:GetQueueAttributes',
+                     'sqs:GetQueueUrl',
+                     'sqs:GetQueueAttributes'],
+            resources=[
+                current_domain_queue.queue_arn
+            ]
+        )
+        lambda_current_gatherer.add_to_role_policy(
+            lambda_current_gatherer_sqs_exec_policy
+        )
+        current_domain_queue.grant_send_messages(lambda_current_gatherer)
+
+        # trigger for 1st and 15th of the month at 18:00 UTC (1pm EST)
+        lambda_current_gatherer_rule = events.Rule(
+            self, "Lambda Current Gatherer Rule",
+            schedule=events.Schedule.cron(
+                minute='0',
+                hour='18',
+                day="1,15",
+                month='*',
+                year='*'
+            )
+        )
+        lambda_current_gatherer_rule.add_target(
+            targets.LambdaFunction(lambda_current_gatherer)
+        )
+        current_federal_asset.grant_read(lambda_current_gatherer)
         
         ##################################
         # Domain Gatherer Lambda and Queue
         ##################################
-        
-        # set dlq on source queue since it's an event source queue
+
         domain_queue = sqs.Queue(
             self, 'domain-queue',
             visibility_timeout=core.Duration.seconds(
@@ -77,7 +158,9 @@ class DomainScanStack(core.Stack):
                      'sqs:GetQueueAttributes',
                      'sqs:GetQueueUrl',
                      'sqs:GetQueueAttributes'],
-            resources=[domain_queue.queue_arn]
+            resources=[
+                domain_queue.queue_arn
+            ]
         )
         lambda_gatherer.add_to_role_policy(lambda_gatherer_sqs_exec_policy)
         domain_queue.grant_send_messages(lambda_gatherer)
@@ -99,7 +182,74 @@ class DomainScanStack(core.Stack):
         asset.grant_read(lambda_gatherer)
         
         ##################################
-        # Domain Scanner Lambda and S3
+        # Site Mapper Lambda and Queue
+        ##################################
+
+        site_mapper_queue = sqs.Queue(
+            self, 'site-mapper-queue',
+            visibility_timeout=core.Duration.seconds(
+                (max_receive_count + 1) * lambda_mapper_timeout),
+            dead_letter_queue=sqs.DeadLetterQueue(
+                max_receive_count=max_receive_count,
+                queue=sqs.Queue(
+                    self, 'site-mapper-queue-dlq',
+                    retention_period=core.Duration.days(5)
+                )
+            )
+        )
+        
+        site_mapper_layer = lambda_.LayerVersion(
+            self, 'site_mapper_layer',
+            code=lambda_.Code.asset('./lambda-releases/site_mapper_layer.zip'),
+            compatible_runtimes=[lambda_.Runtime.PYTHON_3_8],
+            description='A python3.8 layer with scrapy (for lxml dep)'
+        )
+
+        lambda_mapper = lambda_.Function(
+            self, "site-mapper",
+            code=lambda_.Code.asset('./lambdas/site_mapper'),
+            handler="handler.main",
+            timeout=core.Duration.seconds(lambda_mapper_timeout),
+            runtime=lambda_.Runtime.PYTHON_3_8,
+            memory_size=400,
+            layers=[site_mapper_layer]
+        )
+
+        lambda_mapper.add_event_source(
+            sources.SqsEventSource(current_domain_queue, batch_size=1)
+        )
+        lambda_mapper.add_environment('SQS_URL', site_mapper_queue.queue_url)
+
+        site_mapper_sqs_exec_policy = iam.PolicyStatement(
+            effect=iam.Effect.ALLOW,
+            actions=['lambda:InvokeFunction', 
+                     'sqs:SendMessage', 
+                     'sqs:DeleteMessage', 
+                     'sqs:SendMessageBatch',
+                     'sqs:SetQueueAttributes',
+                     'sqs:GetQueueAttributes',
+                     'sqs:GetQueueUrl',
+                     'sqs:GetQueueAttributes'],
+            resources=[site_mapper_queue.queue_arn]
+        )
+        lambda_mapper.add_to_role_policy(site_mapper_sqs_exec_policy)
+        site_mapper_queue.grant_send_messages(lambda_mapper)
+        
+        ##################################
+        # Dynamodb
+        ##################################
+        
+        db = dynamodb.Table(
+            self, "fed-a11y-db",
+            partition_key=dynamodb.Attribute(
+                name="agency+org+domain+subdomain+path",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
+        )
+
+        ##################################
+        # A11y Scanner Lambda and S3
         ##################################
 
         layer = lambda_.LayerVersion(
@@ -121,6 +271,10 @@ class DomainScanStack(core.Stack):
 
         lambda_a11y_scan.add_event_source(
             sources.SqsEventSource(domain_queue, batch_size=1)
+        )
+
+        lambda_a11y_scan.add_event_source(
+            sources.SqsEventSource(site_mapper_queue, batch_size=1)
         )
         
         # create s3 bucket to put results
@@ -147,6 +301,12 @@ class DomainScanStack(core.Stack):
             results_bucket.bucket_name
         )
         results_bucket.grant_put(lambda_a11y_scan)
+
+        lambda_a11y_scan.add_environment(
+            'TABLE_NAME',
+            db.table_name
+        )
+        db.grant_write_data(lambda_a11y_scan)
 
         ##################################
         # Results Joiner Lambda
