@@ -21,7 +21,20 @@ logger = logging.getLogger(__name__)
 warnings.filterwarnings("ignore")
 
 
-def get_sites(tlds = ['gov', 'fed.us', 'mil']):
+def get_sites(tlds = ['gov', 'fed.us', 'mil'], all_sources=True):
+    
+    fed_df = pd.read_csv('https://github.com/GSA/data/raw/master/dotgov-domains/current-federal.csv')
+    fed_df['Domain Name'] = fed_df['Domain Name'].apply(lambda x: x.lower().strip())
+    parsed_domain_names = fed_df['Domain Name'].apply(lambda x: tldextract.extract(x))
+    fed_df['tld'] = parsed_domain_names.apply(lambda x: x.suffix)
+    fed_df['domain'] = parsed_domain_names.apply(lambda x: x.domain)
+    fed_df['subdomain'] = parsed_domain_names.apply(lambda x: x.subdomain)
+    
+    fed_df = fed_df.astype(str)
+    
+    if not all_sources:
+        return None, fed_df
+
     sources = [
         'https://analytics.usa.gov/data/live/sites.csv',
         'https://analytics.usa.gov/data/live/second-level-domains.csv',
@@ -32,7 +45,6 @@ def get_sites(tlds = ['gov', 'fed.us', 'mil']):
         'https://github.com/GSA/data/raw/master/dotgov-websites/other-websites.csv']
     
     sites = []
-    
     for source in sources:
         try:
             r = requests.get(source)
@@ -71,23 +83,20 @@ def get_sites(tlds = ['gov', 'fed.us', 'mil']):
     sites_df = pd.DataFrame(sites)
     sites_df = sites_df.astype(str)
     
-    fed_df = pd.read_csv('https://github.com/GSA/data/raw/master/dotgov-domains/current-federal.csv')
-    fed_df['Domain Name'] = fed_df['Domain Name'].apply(lambda x: x.lower().strip())
-    parsed_domain_names = fed_df['Domain Name'].apply(lambda x: tldextract.extract(x))
-    fed_df['tld'] = parsed_domain_names.apply(lambda x: x.suffix)
-    fed_df['domain'] = parsed_domain_names.apply(lambda x: x.domain)
-    fed_df['subdomain'] = parsed_domain_names.apply(lambda x: x.subdomain)
-    
-    fed_df = fed_df.astype(str)
-    
     return sites_df, fed_df
 
 
 def construct_url(row):
-    tld = row['tld_fed']
+    try:
+        tld = row['tld_fed']
+    except KeyError:
+        tld = row['tld']
     domain = row['domain']
-    subdomain = row['subdomain_sites']
-    
+    try:
+        subdomain = row['subdomain_sites']
+    except KeyError:
+        subdomain = row['subdomain']
+
     if domain == subdomain or not subdomain:
         return f'{domain}.{tld}'
     else:
@@ -134,25 +143,26 @@ def get_routeable_url(schematized_url):
         return h.url
 
 
-if __name__ == '__main__':
-    logging.basicConfig(
-        level=logging.ERROR,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-
+def main(all_sources=True, outfile='domains.csv'):
     print("Downloading latest set of .gov domains from GSA's github")
 
-    sites_df, fed_df = get_sites()
-    df = fed_df.merge(sites_df, on='domain', how='left', suffixes=['_fed', '_sites'])
+    sites_df, fed_df = get_sites(all_sources=all_sources)
+    if sites_df:
+        df = fed_df.merge(sites_df, on='domain', how='left', suffixes=['_fed', '_sites'])
+    else:
+        df = fed_df
+    
     # remove domains that aren't from the executive branch
     df = df[df['Domain Type'] == 'Federal Agency - Executive']
-    # fill nulls in the site column with the domain and tld from the current federal csv
-    df['site'] = df['site'].fillna(df['domain'] + "." + df['tld_fed'])
-    df = df.drop_duplicates(subset=['site'])
+    
+    if sites_df:
+        # fill nulls in the site column with the domain and tld from the current federal csv
+        df['site'] = df['site'].fillna(df['domain'] + "." + df['tld_fed'])
+        df = df.drop_duplicates(subset=['site'])
 
-    blacklist_terms = ['dev', 'test', 'staging', 'webmail', 'intranet', 'gopher', 'beta', 'ftp', 
+        blacklist_terms = ['dev', 'test', 'staging', 'webmail', 'intranet', 'gopher', 'beta', 'ftp', 
                        'smtp', 'preprod', 'mail2', 'fas.my.salesforce', 'uccams', 'gitlab', 'github']
-    df = df[~df['site'].str.contains("|".join(blacklist_terms))]
+        df = df[~df['site'].str.contains("|".join(blacklist_terms))]
 
     df['constructed_url'] = df.apply(construct_url, axis = 1)
 
@@ -201,6 +211,15 @@ if __name__ == '__main__':
 
     df[['Agency', 'Organization']] = df.apply(rename_rows,axis=1).apply(pd.Series)
     
-    df.to_csv('domains.csv', index=False)
+    df.to_csv(outfile, index=False)
 
     print("All done!")
+
+
+if __name__ == '__main__':
+    logging.basicConfig(
+        level=logging.ERROR,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+
+    main(all_sources=False, outfile='current-federal.csv')
