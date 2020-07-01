@@ -1,12 +1,10 @@
 import json
-import os
 import random
 from urllib.parse import urljoin, urlparse
 
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import IGNORED_EXTENSIONS, LinkExtractor
 from scrapy.crawler import CrawlerProcess
-from scrapy.utils.project import get_project_settings
 import scrapy
 from twisted.internet import reactor
 
@@ -15,28 +13,28 @@ from send_message import send_message
 
 USER_AGENTS = [
     ('Mozilla/5.0 (X11; Linux x86_64) '
-    'AppleWebKit/537.36 (KHTML, like Gecko) '
-    'Chrome/57.0.2987.110 '
-    'Safari/537.36'),  # chrome
+     'AppleWebKit/537.36 (KHTML, like Gecko) '
+     'Chrome/57.0.2987.110 '
+     'Safari/537.36'),  # chrome
     ('Mozilla/5.0 (X11; Linux x86_64) '
-    'AppleWebKit/537.36 (KHTML, like Gecko) '
-    'Chrome/61.0.3163.79 '
-    'Safari/537.36'),  # chrome
+     'AppleWebKit/537.36 (KHTML, like Gecko) '
+     'Chrome/61.0.3163.79 '
+     'Safari/537.36'),  # chrome
     ('Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:55.0) '
-    'Gecko/20100101 '
-    'Firefox/55.0'),  # firefox
+     'Gecko/20100101 '
+     'Firefox/55.0'),  # firefox
     ('Mozilla/5.0 (X11; Linux x86_64) '
-    'AppleWebKit/537.36 (KHTML, like Gecko) '
-    'Chrome/61.0.3163.91 '
-    'Safari/537.36'),  # chrome
+     'AppleWebKit/537.36 (KHTML, like Gecko) '
+     'Chrome/61.0.3163.91 '
+     'Safari/537.36'),  # chrome
     ('Mozilla/5.0 (X11; Linux x86_64) '
-    'AppleWebKit/537.36 (KHTML, like Gecko) '
-    'Chrome/62.0.3202.89 '
-    'Safari/537.36'),  # chrome
+     'AppleWebKit/537.36 (KHTML, like Gecko) '
+     'Chrome/62.0.3202.89 '
+     'Safari/537.36'),  # chrome
     ('Mozilla/5.0 (X11; Linux x86_64) '
-    'AppleWebKit/537.36 (KHTML, like Gecko) '
-    'Chrome/63.0.3239.108 '
-    'Safari/537.36'),  # chrome
+     'AppleWebKit/537.36 (KHTML, like Gecko) '
+     'Chrome/63.0.3239.108 '
+     'Safari/537.36'),  # chrome
 ]
 
 
@@ -90,12 +88,12 @@ class MySpider(CrawlSpider):
                     try:
                         scrapy.http.Request(
                             url,
-                            meta = {
+                            meta={
                                 'dont_redirect': True,
                                 'download_timeout': 20
                             }
                         )
-                    except:
+                    except Exception:
                         continue
                     
                     path = urlparse(url).path
@@ -144,7 +142,7 @@ def scrape(routeable_url=None, domain=None, tld='gov', subdomain='', **kwargs):
     )
     
     MySpider.deny = (
-        r'^[^\/]*(?:\/[^\/]*){6,}$', # 6 or more slashes
+        r'^[^\/]*(?:\/[^\/]*){6,}$',  # 6 or more slashes
         r'mailto',
         r'tel:',
         r'javascript',

@@ -1,7 +1,6 @@
 import os
 
 from aws_cdk import (
-    aws_autoscaling as autoscaling,
     aws_dynamodb as dynamodb,
     aws_events as events,
     aws_events_targets as targets,
