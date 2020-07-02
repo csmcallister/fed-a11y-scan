@@ -31,8 +31,8 @@ def test_send_message(sqs):
     ('https://www.bar.foo.gov', ('foo', 'bar', '')),
     ('https://www.fiz.bar.foo.gov', ('foo', 'fiz.bar', '')),
     ('https://www.foo.gov/baz', ('foo', '', 'baz')),
-    ('https://www.foo.gov/baz/biz', ('foo', '', 'baz/biz') ),
-    ('https://www.bar.foo.gov/baz/biz', ('foo', 'bar', 'baz/biz') ),
+    ('https://www.foo.gov/baz/biz', ('foo', '', 'baz/biz')),
+    ('https://www.bar.foo.gov/baz/biz', ('foo', 'bar', 'baz/biz')),
     ('https://www.fiz.foo.gov/bar', ('foo', 'fiz', 'bar')),
     ('https://foo.gov', ('foo', '', '')),
     ('https://bar.foo.gov', ('foo', 'bar', ''))
