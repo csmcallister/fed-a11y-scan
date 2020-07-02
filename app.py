@@ -239,7 +239,7 @@ class DomainScanStack(core.Stack):
         ##################################
         
         db = dynamodb.Table(
-            self, "fed-a11y-db",
+            self, "fed-a11y-scan-db",
             partition_key=dynamodb.Attribute(
                 name="agency+org+domain+subdomain+path",
                 type=dynamodb.AttributeType.STRING
