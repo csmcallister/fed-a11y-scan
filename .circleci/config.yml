@@ -16,7 +16,7 @@ jobs:
       - run:
           name: create-empty-aws-creds
           command: |
-            touch ~/.aws/credentials
+            mkdir ~/.aws && touch ~/.aws/credentials
       
       - run:
           name: setup-test-reporter
