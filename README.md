@@ -1,3 +1,8 @@
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![CircleCI](https://circleci.com/gh/csmcallister/fed-a11y-scan.svg?style=svg)](https://circleci.com/gh/csmcallister/fed-a11y-scan)
+[![Maintainability](https://api.codeclimate.com/v1/badges/52cc06fdf519f75d6b4c/maintainability)](https://codeclimate.com/github/csmcallister/fed-a11y-scan/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/52cc06fdf519f75d6b4c/test_coverage)](https://codeclimate.com/github/csmcallister/fed-a11y-scan/test_coverage)
+
 # Fed A11y Scan
 
 Automated accessibility testing of U.S. Federal Government websites using a serverless infrastructure.
