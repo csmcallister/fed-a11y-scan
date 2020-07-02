@@ -80,7 +80,24 @@ class MySpider(CrawlSpider):  # pragma: no cover
         'TELNETCONSOLE_ENABLED': False
     }
     
+    
+    @staticmethod
+    def format_url(url):
+        parsed_url = urlparse(url)
+        path = parsed_url.path
+        path = path if path != '/' else ''
+        path = path[1:] if path.startswith('/') else path
+        domains = parsed_url.netloc.split('.gov')[0].split(".")
+        domain = domains.pop(-1)
+        try:
+            domains.remove('www')
+        except ValueError:
+            pass
+        subdomain = ".".join(domains)
 
+        return domain, subdomain, path
+    
+    
     def _process_request(self, req):
         url = req.url
         if url.lower().endswith(tuple(IGNORED_EXTENSIONS)):
@@ -124,24 +141,22 @@ class MySpider(CrawlSpider):  # pragma: no cover
                         )
                     except Exception:  # pragma: no cover
                         continue
-                    
-                    path = urlparse(url).path
-                    path = path if path != '/' else ''
-                    path = path[1:] if path.startswith('/') else path
-                    path = path.replace("/", "+")
+
+                    domain, subdomain, path = MySpider.format_url(url)
+
                     # partitionKey is agency+org+domain+subdomain+path
                     db_id = (
                         f'{self.agency}+{self.organization}+'
-                        f'{self.domain}+{self.subdomain}+{path}'
+                        f'{domain}+{subdomain}+{path}'
                     )
                     
                     msg_body = json.dumps(dict(
                         Agency=self.agency,
                         Organization=self.organization,
-                        domain=self.domain,
-                        subdomain=self.subdomain,
-                        tld=self.tld,
-                        routeable_url=self.start_urls[0],
+                        domain=domain,
+                        subdomain=subdomain,
+                        tld='gov',
+                        routeable_url=url,
                         db_id=db_id
                     ))
 
