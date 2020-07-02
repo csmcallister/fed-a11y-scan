@@ -14,20 +14,10 @@ logging.basicConfig(
     format='%(levelname)s: %(asctime)s: %(message)s'
 )
 
-BUCKET_NAME = os.getenv('BUCKET_NAME')
-OBJECT_KEY = os.getenv('OBJECT_KEY')
-SQS_URL = os.getenv('SQS_URL')
-sqs_client = boto3.client('sqs')
-s3 = boto3.resource(u's3')
-
-
-def log_helper(logger, e, event):  # pragma: no cover
-    logger.error('## EXCEPTION')
-    logger.error(e, exc_info=True)
-    logger.error('## ENV VARS')
-    logger.error(os.environ)
-    logger.error('## EVENT')
-    logger.error(event)
+BUCKET_NAME = os.getenv('BUCKET_NAME')  
+OBJECT_KEY = os.getenv('OBJECT_KEY')  
+SQS_URL = os.getenv('SQS_URL')  
+sqs_client = boto3.client('sqs')  
 
 
 def grouper(n, iterable, fillvalue=None):
@@ -57,6 +47,7 @@ def send_sqs_messages(msg_bodies, sqs_queue_url=SQS_URL):
 
 
 def get_domains():
+    s3 = boto3.resource(u's3')
     bucket = s3.Bucket(BUCKET_NAME)
     obj = bucket.Object(key=OBJECT_KEY)
     response = obj.get()
@@ -67,13 +58,22 @@ def get_domains():
         for row in rows:
             if not row:  # pragma: no cover
                 continue
-            # nix non-Executive branch domains for now
-            domain_type = row.get('Domain Type').strip()
-            if domain_type == 'Federal Agency - Executive':
-                msg_bodies.append(json.dumps(row))
+            msg_bodies.append(json.dumps(row))
+        
         if not msg_bodies:  # pragma: no cover
             continue
         send_sqs_messages(msg_bodies)
+
+    return "Success!"
+
+
+def log_helper(logger, e, event):  # pragma: no cover
+    logger.error('## EXCEPTION')
+    logger.error(e, exc_info=True)
+    logger.error('## ENV VARS')
+    logger.error(os.environ)
+    logger.error('## EVENT')
+    logger.error(event)
 
 
 def main(event, context):
