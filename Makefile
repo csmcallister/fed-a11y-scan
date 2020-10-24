@@ -6,7 +6,12 @@ build_a11y_scan:
 	then \
 		echo "Installing pa11y deps"; \
 		npm install && rm -rf node_modules/puppeteer && \
-			sed -i '' "10s/require('puppeteer')/require('puppeteer-core')/" node_modules/pa11y/lib/pa11y.js; \
+			if [[ "$OSTYPE" == "darwin"* ]]; \
+			then \
+				sed -i '' "10s/require('puppeteer')/require('puppeteer-core')/" node_modules/pa11y/lib/pa11y.js; \
+			else \
+				sed -i -e "10s/require('puppeteer')/require('puppeteer-core')/" node_modules/pa11y/lib/pa11y.js; \
+			fi; \
 	fi; \
 
 	cd ..; \
