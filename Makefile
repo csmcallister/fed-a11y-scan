@@ -21,6 +21,8 @@ build_a11y_scan:
 		rm -rf chrome-aws-lambda/; \
 	fi; \
 
+	echo "All done making a11y_scan lambda"
+
 	
 build_results_joiner:
 	
@@ -37,28 +39,13 @@ build_results_joiner:
 	# clean up
 	rm -rf tmp/
 
-
-build_site_mapper:
-	
-	# make a python dir for layer
-	mkdir -p python/lib/python3.8/site-packages
-	
-	cp lambdas/site_mapper/requirements.txt ./reqs.txt
-	# run dep installation in AWS Linux docker image and write to local dir
-	docker run -v ${PWD}:/var/task "lambci/lambda:build-python3.8" /bin/sh -c "pip install -r ./reqs.txt -t python/lib/python3.8/site-packages/; exit" && \
-	zip -r lambda-releases/site_mapper_layer.zip python > /dev/null
-	
-	rm -rf python/
-	rm reqs.txt
-
-
 bootstrap:	
-	cdk bootstrap --profile fed-a11y-scan
+	cdk bootstrap --profile fed-a11y
 
 
 deploy:
-	cdk deploy --profile fed-a11y-scan
+	cdk deploy --profile fed-a11y
 
 
 destroy:
-	cdk destroy --profile fed-a11y-scan
+	cdk destroy --profile fed-a11y

@@ -6,9 +6,7 @@ const pa11y = require('pa11y');
 AWS.config.update({region: 'us-east-1'});
 
 var s3 = new AWS.S3();
-var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
 const bucket = process.env.BUCKET_NAME;
-const tableName = process.env.TABLE_NAME
 
 function isEmpty(obj) {
   for(var key in obj) {
@@ -28,7 +26,7 @@ async function putResult(result, messageBody) {
   const scanDate = moment().format('Y-MM-DD');
   const prefix = `${agency}/${organization}`;
   const key = (subdomain) ? `${prefix}/${domain}/${subdomain}` : `${prefix}/${domain}`;
-  
+
   const data = {
     'agency': agency,
     'organization': organization,
@@ -40,48 +38,27 @@ async function putResult(result, messageBody) {
     'scanDate': scanDate
   };
 
-  if ( !messageBody.db_id ) {
-
-    const params = {
-      Bucket: bucket,
-      Key: `${key}.json`,
-      Body: JSON.stringify(data),
-      ContentType: 'application/json'
-    };
-  
-    try {
-      const response = await s3.upload(params).promise();
-      console.log('Response: ', response);
-      return response;
-    } catch (error) {
-        console.log(error);
-    } 
-  } else {
-    // This is for the sitemapper functionality test
-    let ddbParams = {
-      TableName: tableName,
-      Item: {
-        'agency+org+domain+subdomain+path' : {S: messageBody.db_id},
-        'data' : {S: JSON.stringify(data)}
-      }
-    };
-
-    ddb.putItem(ddbParams, (err, data) => {
-      if (err) {
-        console.log("Error", err);
-      } else {
-        console.log("Successfully putItem");
-      }
-    });
-
+  const params = {
+    Bucket: bucket,
+    Key: `${key}.json`,
+    Body: JSON.stringify(data),
+    ContentType: 'application/json'
   };
+
+  try {
+    const response = await s3.upload(params).promise();
+    console.log('Response: ', response);
+    return response;
+  } catch (error) {
+      console.log(error);
+  }
   return
 };
 
 async function runPa11y(domain, browser) {
   let result = null;
   let ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36';
-  
+
   try {
     result = await pa11y(domain, { 
       standard: 'Section508',
@@ -90,7 +67,7 @@ async function runPa11y(domain, browser) {
       userAgent: ua
     });
     return JSON.stringify(result, null)
-  
+
   } catch (error) {
       console.error(`FAILED TO SCAN ${domain}: \n ${error}`);
   };
@@ -109,11 +86,11 @@ exports.handler = async (event, context) => {
   } catch (error) {
     context.fail(error)
   }
-   
+
   if (!messageBody) {
     return context.fail("No message body");
   }
-  
+
   try {
     browser = await chromium.puppeteer.launch({
       args: chromium.args,
@@ -131,7 +108,7 @@ exports.handler = async (event, context) => {
   } catch (error) {
       console.error(messageBody.routeable_url)
       return context.fail(error);
-  
+
   } finally {
       if (browser !== null) {
         try { await browser.close(); } catch (e) { }
@@ -143,12 +120,11 @@ exports.handler = async (event, context) => {
     console.log("empty result")
     return context.succeed(result);
   } 
-  
+
   try {
     response = await putResult(result, messageBody)
   } catch (error) {
       return context.fail(error)
   }
-
   return context.succeed();
 };
