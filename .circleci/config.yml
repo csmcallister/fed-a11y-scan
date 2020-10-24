@@ -1,23 +1,18 @@
 version: 2.1
 
 executors:
-  test-and-lint-exc:
+  default:
     docker:
-      - image: circleci/python:3.8.2
+      - image: cimg/python:3.8.6-node
 
 jobs:
 
   test:
-    executor: test-and-lint-exc
+    executor: default
       
     steps:
       - checkout
 
-      - run:
-          name: create-empty-aws-creds
-          command: |
-            mkdir ~/.aws && touch ~/.aws/credentials
-      
       - run:
           name: setup-test-reporter
           command: |
@@ -27,9 +22,7 @@ jobs:
       - run:
           name: install-deps
           command: |
-            sudo python3.8 -m venv env
-            . env/bin/activate
-            sudo pip install -r requirements.txt
+            pip install -r requirements.txt
       
       - run:
           name: flake8
@@ -37,22 +30,65 @@ jobs:
             flake8
 
       - run:
+          name: create-empty-aws-creds
+          command: |
+            mkdir ~/.aws && touch ~/.aws/credentials
+      
+      - run:
           name: test
           command: |
             ./cc-test-reporter before-build
-            sudo coverage run -m pytest
-            sudo coverage xml
+            coverage run -m pytest
+            coverage xml
             ./cc-test-reporter after-build --debug -t "coverage.py" --exit-code $?
 
       - store_artifacts: # See circleci.com/docs/2.0/artifacts/ for more details.
           path: coverage.xml
           destination: coverage.xml
-  
+
+  build:
+    executor: default
+
+    steps:
+      - checkout
+
+      - run:
+          name: 'install-cdk'
+          command: |
+            sudo npm install -g aws-cdk@latest
+
+      - run:
+          name: 'build-a11y-scan'
+          command: |
+            if git diff --name-only master | grep -q 'a11y_scan'; then 
+              make build_a11y_scan
+            fi
+
+      - run:
+          name: 'build-results-joiner'
+          command: |
+            if git diff --name-only master | grep -q 'results_joiner'; then 
+              sudo apt update && sudo apt install -y rsync && make build_results_joiner
+            fi
+      
+      - run:
+          name: install-deps
+          command: |
+            pip install -r requirements.txt
+
+      - run:
+          name: 'cdk-diff'
+          command: |
+            cdk diff 2>&1 | sed -r 's/\\x1B\\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g' || true
+      
 
 workflows:
   version: 2
-  lint-and-test: 
+  test-and-build: 
     jobs:
       - test
+      - build:
+          requires:
+            - test
 
 

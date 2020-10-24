@@ -210,11 +210,8 @@ cdk.out
 node_modules
 *.swp
 cdk.context.json
-package-lock.json
 .vscode
 
-# Lambda Deployments
-**/package-lock.json
 
 #Data
 table.json
