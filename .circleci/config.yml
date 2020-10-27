@@ -71,26 +71,21 @@ jobs:
       - run:
           name: 'cdk-diff'
           command: |
-            pr_number=${CIRCLE_PULL_REQUEST##*/}
-            echo $pr_number
-            block='```'
-            diff=$(echo -e "cdk diff \n${block}\n$(cdk diff --no-color 2>&1 | sed -e 's/\\x1B\\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g' || true)\n${block}")
-            data=$(jq -n --arg body "$diff" '{ body: $body }')
-            curl -X POST -H 'Content-Type:application/json' \
-              -H 'Accept: application/vnd.github.v3+json' \
-              -H "Authorization: token ${GITHUB_TOKEN}" \
-              -d "$data" \
-              "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/issues/${pr_number}/comments"
-
-      - run:
-          name: 'cdk-deploy'
-          command: |
             if [ "$CIRCLE_BRANCH" == "master" ]; then
-            cdk deploy --require-approval never;
+              cdk deploy --require-approval never;
             else
-              echo "not deploying";
+              pr_number=${CIRCLE_PULL_REQUEST##*/}
+              echo $pr_number
+              block='```'
+              diff=$(echo -e "cdk diff \n${block}\n$(cdk diff --no-color 2>&1 | sed -e 's/\\x1B\\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g' || true)\n${block}")
+              data=$(jq -n --arg body "$diff" '{ body: $body }')
+              curl -X POST -H 'Content-Type:application/json' \
+                -H 'Accept: application/vnd.github.v3+json' \
+                -H "Authorization: token ${GITHUB_TOKEN}" \
+                -d "$data" \
+                "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/issues/${pr_number}/comments"
             fi
-      
+
 
 workflows:
   version: 2
