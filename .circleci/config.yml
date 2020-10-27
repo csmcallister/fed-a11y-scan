@@ -42,7 +42,7 @@ jobs:
             coverage xml
             ./cc-test-reporter after-build --debug -t "coverage.py" --exit-code $?
 
-      - store_artifacts: # See circleci.com/docs/2.0/artifacts/ for more details.
+      - store_artifacts:
           path: coverage.xml
           destination: coverage.xml
 
@@ -58,18 +58,10 @@ jobs:
             sudo npm install -g aws-cdk@latest
 
       - run:
-          name: 'build-a11y-scan'
+          name: 'build-lambdas'
           command: |
-            if git diff --name-only master | grep -q 'a11y_scan'; then 
-              make build_a11y_scan
-            fi
-
-      - run:
-          name: 'build-results-joiner'
-          command: |
-            if git diff --name-only master | grep -q 'results_joiner'; then 
-              sudo apt update && sudo apt install -y rsync && make build_results_joiner
-            fi
+            make build_a11y_scan;
+            sudo apt update && sudo apt install -y rsync && make build_results_joiner;
       
       - run:
           name: install-deps
@@ -79,7 +71,25 @@ jobs:
       - run:
           name: 'cdk-diff'
           command: |
-            cdk diff 2>&1 | sed -r 's/\\x1B\\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g' || true
+            pr_number=${CIRCLE_PULL_REQUEST##*/}
+            echo $pr_number
+            block='```'
+            diff=$(echo -e "cdk diff \n${block}\n$(cdk diff --no-color 2>&1 | sed -e 's/\\x1B\\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g' || true)\n${block}")
+            data=$(jq -n --arg body "$diff" '{ body: $body }')
+            curl -X POST -H 'Content-Type:application/json' \
+              -H 'Accept: application/vnd.github.v3+json' \
+              -H "Authorization: token ${GITHUB_TOKEN}" \
+              -d "$data" \
+              "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/issues/${pr_number}/comments"
+
+      - run:
+          name: 'cdk-deploy'
+          command: |
+            if [ "$CIRCLE_BRANCH" == "master" ]; then
+            cdk deploy --require-approval never;
+            else
+              echo "not deploying";
+            fi
       
 
 workflows:
