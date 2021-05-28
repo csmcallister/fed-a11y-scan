@@ -61,7 +61,7 @@ async function runPa11y(domain, browser) {
 
   try {
     result = await pa11y(domain, { 
-      standard: 'Section508',
+      standard: 'WCAG2A', // https://github.com/pa11y/pa11y/issues/528
       timeout: 50000, //be generous
       browser: browser,
       userAgent: ua
