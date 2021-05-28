@@ -8,9 +8,9 @@ build_a11y_scan:
 		npm install && rm -rf node_modules/puppeteer && \
 			if [[ "$OSTYPE" == "darwin"* ]]; \
 			then \
-				sed -i '' "10s/require('puppeteer')/require('puppeteer-core')/" node_modules/pa11y/lib/pa11y.js; \
+				sed -i '' "9s/require('puppeteer')/require('puppeteer-core')/" node_modules/pa11y/lib/pa11y.js; \
 			else \
-				sed -i -e "10s/require('puppeteer')/require('puppeteer-core')/" node_modules/pa11y/lib/pa11y.js; \
+				sed -i -e "9s/require('puppeteer')/require('puppeteer-core')/" node_modules/pa11y/lib/pa11y.js; \
 			fi; \
 	fi; \
 
