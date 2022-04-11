@@ -41,8 +41,6 @@ def send_sqs_messages(msg_bodies, sqs_queue_url=SQS_URL):
     for i, msg_body in enumerate(msg_bodies):
         if msg_body:
             entries.append({'Id': str(i), 'MessageBody': msg_body})
-        else:  # pragma: no cover
-            break
     
     try:
         return sqs_client.send_message_batch(
@@ -65,15 +63,12 @@ def get_domains():
     for rows in grouper(10, csvreader):
         msg_bodies = []
         for row in rows:
-            if not row:  # pragma: no cover
-                continue
-            # nix non-Executive branch domains for now
-            domain_type = row.get('Domain Type').strip()
-            if domain_type == 'Federal Agency - Executive':
-                msg_bodies.append(json.dumps(row))
-        if not msg_bodies:  # pragma: no cover
-            continue
-        send_sqs_messages(msg_bodies)
+            if row:
+                domain_type = row.get('Domain Type').strip()
+                if domain_type == 'Federal Agency - Executive':
+                    msg_bodies.append(json.dumps(row))
+        if msg_bodies:
+            send_sqs_messages(msg_bodies)
 
 
 def main(event, context):

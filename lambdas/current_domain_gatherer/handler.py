@@ -14,10 +14,10 @@ logging.basicConfig(
     format='%(levelname)s: %(asctime)s: %(message)s'
 )
 
-BUCKET_NAME = os.getenv('BUCKET_NAME')  
-OBJECT_KEY = os.getenv('OBJECT_KEY')  
-SQS_URL = os.getenv('SQS_URL')  
-sqs_client = boto3.client('sqs')  
+BUCKET_NAME = os.getenv('BUCKET_NAME')
+OBJECT_KEY = os.getenv('OBJECT_KEY')
+SQS_URL = os.getenv('SQS_URL')
+sqs_client = boto3.client('sqs')
 
 
 def grouper(n, iterable, fillvalue=None):
