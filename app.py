@@ -106,7 +106,7 @@ class DomainScanStack(core.Stack):
         layer = lambda_.LayerVersion(
             self, 'chrome-aws-lambda',
             code=lambda_.Code.from_asset('./lambdas/chrome_aws_lambda.zip'),
-            compatible_runtimes=[lambda_.Runtime.NODEJS_10_X],
+            compatible_runtimes=[lambda_.Runtime.NODEJS_12_X],
             description='A layer of chrome-aws-lambda'
         )
 
@@ -115,7 +115,7 @@ class DomainScanStack(core.Stack):
             code=lambda_.Code.from_asset('./lambdas/a11y_scan'),
             handler="index.handler",
             timeout=core.Duration.seconds(lambda_a11y_scan_timeout),
-            runtime=lambda_.Runtime.NODEJS_10_X,
+            runtime=lambda_.Runtime.NODEJS_12_X,
             memory_size=1000,
             layers=[layer]
         )
