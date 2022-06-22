@@ -1,17 +1,17 @@
-aws-cdk.core>=1.31.0
-aws-cdk.cx-api>=1.31.0
-aws-cdk.aws-events>=1.31.0
-aws-cdk.aws-events-targets>=1.31.0
-aws-cdk.aws-iam>=1.31.0
-aws-cdk.aws-lambda>=1.31.0
-aws-cdk.aws-lambda-event-sources>=1.31.0
-aws-cdk.aws-s3>=1.31.0
-aws-cdk.aws-s3-assets>=1.31.0
-aws-cdk.aws-sqs>=1.31.0
-boto3>=1.14.15
+aws-cdk.core==1.31.0
+aws-cdk.cx-api==1.31.0
+aws-cdk.aws-events==1.31.0
+aws-cdk.aws-events-targets==1.31.0
+aws-cdk.aws-iam==1.31.0
+aws-cdk.aws-lambda==1.31.0
+aws-cdk.aws-lambda-event-sources==1.31.0
+aws-cdk.aws-s3==1.31.0
+aws-cdk.aws-s3-assets==1.31.0
+aws-cdk.aws-sqs==1.31.0
+boto3==1.14.15
 coverage==5.1
-flake8>=3.7.9
+flake8==3.7.9
 moto[sqs,s3]
-python-dateutil>=2.8.1
+python-dateutil==2.8.1
 pytest==5.4.1
-rsa>=4.7 # not directly required, pinned by Snyk to avoid a vulnerability
+rsa==4.7 # not directly required, pinned by Snyk to avoid a vulnerability

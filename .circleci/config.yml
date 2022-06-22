@@ -53,9 +53,19 @@ jobs:
       - checkout
 
       - run:
+          name: 'install-nvm'
+          command: |
+            wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+
+      - run:
+          name: 'use-node-14'
+          command: |
+            nvm install && nvm use
+      
+      - run:
           name: 'install-cdk'
           command: |
-            sudo npm install -g aws-cdk@latest
+            sudo npm install -g aws-cdk@2.28.1
 
       - run:
           name: 'build-lambdas'

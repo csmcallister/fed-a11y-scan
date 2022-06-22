@@ -55,7 +55,7 @@ class DomainScanStack(core.Stack):
         
         lambda_gatherer = lambda_.Function(
             self, "domain-gatherer",
-            code=lambda_.Code.asset('./lambdas/domain_gatherer'),
+            code=lambda_.Code.from_asset('./lambdas/domain_gatherer'),
             handler="handler.main",
             timeout=core.Duration.seconds(lambda_gatherer_timeout),
             runtime=lambda_.Runtime.PYTHON_3_7,
@@ -105,14 +105,14 @@ class DomainScanStack(core.Stack):
 
         layer = lambda_.LayerVersion(
             self, 'chrome-aws-lambda',
-            code=lambda_.Code.asset('./lambdas/chrome_aws_lambda.zip'),
+            code=lambda_.Code.from_asset('./lambdas/chrome_aws_lambda.zip'),
             compatible_runtimes=[lambda_.Runtime.NODEJS_10_X],
             description='A layer of chrome-aws-lambda'
         )
 
         lambda_a11y_scan = lambda_.Function(
             self, "a11y-scan",
-            code=lambda_.Code.asset('./lambdas/a11y_scan'),
+            code=lambda_.Code.from_asset('./lambdas/a11y_scan'),
             handler="index.handler",
             timeout=core.Duration.seconds(lambda_a11y_scan_timeout),
             runtime=lambda_.Runtime.NODEJS_10_X,
@@ -168,7 +168,7 @@ class DomainScanStack(core.Stack):
 
         lambda_joiner = lambda_.Function(
             self, "results-joiner",
-            code=lambda_.Code.asset('./lambda-releases/results_joiner.zip'),
+            code=lambda_.Code.from_asset('./lambda-releases/results_joiner.zip'),
             handler="handler.main",
             timeout=core.Duration.seconds(lambda_joiner_timeout),
             runtime=lambda_.Runtime.PYTHON_3_7,
