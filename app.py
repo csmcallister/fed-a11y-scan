@@ -168,7 +168,9 @@ class DomainScanStack(core.Stack):
 
         lambda_joiner = lambda_.Function(
             self, "results-joiner",
-            code=lambda_.Code.from_asset('./lambda-releases/results_joiner.zip'),
+            code=lambda_.Code.from_asset(
+                './lambda-releases/results_joiner.zip'
+            ),
             handler="handler.main",
             timeout=core.Duration.seconds(lambda_joiner_timeout),
             runtime=lambda_.Runtime.PYTHON_3_7,
