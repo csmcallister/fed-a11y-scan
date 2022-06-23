@@ -39,7 +39,7 @@ These instructions prepare assets for deployment via the AWS CDK.
 
 #### Build a11y scan lambda
 
-Before we let the AWS CDK deploy the a11y lambda function, we need to make a lambda layer for headless chrome and then tweak the internals of `pa11y`, the accessibility scanning tool, to use headless chrome.
+Before we let the AWS CDK deploy the a11y lambda function, we need to make a lambda layer for headless chrome and then tweak the internals of [pa11y](https://github.com/pa11y/pa11y), the accessibility scanning tool, to use headless chrome.
 
 To create the lamda layer with [chrome-aws-lambda](https://github.com/alixaxel/chrome-aws-lambda) and replace `pa11y`'s dependency on puppeteer with puppeteer-core, run:
 
@@ -60,6 +60,17 @@ make build_results_joiner
 ```
 
 After this, you'll have a new directory in the root of the repo called `lambda_releases` with a file called `results.joiner.zip`. That is the lambda deployment package.
+
+
+### Scan Scheduling
+
+The scan pipeline:
+
+1. `lambda_gatherer` is a Lambda Function triggered the 1st and 15th of every month, sending one message per row in `./domains/domains.csv` to `domain_queue` SQS queue.
+2. `lambda_a11y_scan` is a Lambda Function with `domain_queue` as its event source. It uses [pa11y](https://github.com/pa11y/pa11y) to scan each site, writing the results of each scan to an individual json file in the `results_bucket`.
+3. `lambda_joiner` is a Lambda Function triggered the 8th and 23rd of every month. It generates summary statistics from the JSON files in the `results_bucket`, writing those results as two larger JSON files, `data.json` and `hist.json`, to the `data_bucket` S3 bucket. Importantly, all objects within the `results_bucket` are deleted every 10 days, hence the <10 day difference between the days of the month that trigger the other two lambda functions.
+
+>Could be done more elegantly with Step Functions...one day.
 
 ## Deploy
 
