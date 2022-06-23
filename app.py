@@ -174,7 +174,7 @@ class DomainScanStack(core.Stack):
             handler="handler.main",
             timeout=core.Duration.seconds(lambda_joiner_timeout),
             runtime=lambda_.Runtime.PYTHON_3_7,
-            memory_size=400
+            memory_size=800
         )
         lambda_joiner.add_environment(
             'DATA_BUCKET_NAME',
