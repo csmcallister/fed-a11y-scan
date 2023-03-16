@@ -55,7 +55,7 @@ jobs:
       - run:
           name: 'install-cdk'
           command: |
-            sudo npm install -g aws-cdk@2.28.1
+            sudo npm install -g aws-cdk@1.31.0
 
       - run:
           name: 'build-lambdas'
