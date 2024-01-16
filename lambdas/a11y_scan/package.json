@@ -10,6 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "moment": "^2.29.4",
-    "pa11y": "^6.0.0"
+    "pa11y": "^7.0.0"
   }
 }
